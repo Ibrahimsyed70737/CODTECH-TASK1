@@ -10,7 +10,7 @@
 
 **Mentor:** Santosh kumar
 
-**Objective:**
+##**Objective:**
 
 To build a machine learning model that can classify movie reviews as positive or negative based on their text content.
 

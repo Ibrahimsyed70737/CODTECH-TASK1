@@ -1,0 +1,60 @@
+#linear regression model
+import pandas as pd
+import string
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
+# Ensure nltk dependencies are downloaded
+import nltk
+nltk.download('stopwords')
+
+# Load the dataset from a CSV file
+csv_file_path = 'sampled_movie_reviews.csv'
+reviews_df = pd.read_csv(csv_file_path)
+
+# Preprocess function
+def preprocess_review(review):
+    # Tokenize the review
+    review = review.split()
+    # Convert to lowercase
+    review = [word.lower() for word in review]
+    # Remove punctuation
+    review = [word for word in review if word not in string.punctuation]
+    # Remove stopwords
+    stop_words = set(stopwords.words('english'))
+    review = [word for word in review if word not in stop_words]
+    return ' '.join(review)
+
+# Apply preprocessing to reviews
+reviews_df['review'] = reviews_df['review'].apply(preprocess_review)
+
+# Map 'pos' and 'neg' labels to 1 (positive) and 0 (negative)
+reviews_df['sentiment'] = reviews_df['sentiment'].map({'pos': 1, 'neg': 0})
+
+# Initialize TF-IDF Vectorizer
+vectorizer = TfidfVectorizer(max_features=5000)
+
+# Fit and transform the data
+X = vectorizer.fit_transform(reviews_df['review'])
+y = reviews_df['sentiment']
+
+# Split the data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Initialize and train the model
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# Predict on test set
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+report = classification_report(y_test, y_pred, target_names=['negative', 'positive'])
+
+print(f'Accuracy: {accuracy}')
+print('Classification Report:')
+print(report)
